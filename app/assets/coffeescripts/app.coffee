@@ -35,7 +35,8 @@ $(document).ready ->
     tagName: 'form'
     template: _.template($('#new_category').html())
     events:
-      'keypress #category_name': 'saveNewCategory'
+      'keypress #category_name': 'saveNewCategoryIfSubmit'
+      'click #save-new-category': 'saveNewCategory'
       'focusout #category_name': 'emptyMessages'
 
     initialize: ->
@@ -46,11 +47,14 @@ $(document).ready ->
       $(@el).html @template()
       @
 
-    saveNewCategory: (event) ->
+    saveNewCategoryIfSubmit: (event) ->
       if event.keyCode is 13
         event.preventDefault()
-        attributes = { category: { name: $("#category_name").val() } }
-        @collection.create(attributes, { error: @showErrors })
+        saveNewCategory()
+
+    saveNewCategory: ->
+      attributes = { category: { name: $("#category_name").val() } }
+      @collection.create(attributes, { error: @showErrors })
 
     emptyMessages: ->
       $("#messages").empty()

@@ -6,7 +6,7 @@
   this.app = (_ref = window.app) != null ? _ref : {};
 
   $(document).ready(function() {
-    var Categories, CategoriesView, Category, CategoryView, MetricsRouter, _ref1;
+    var Categories, CategoriesView, Category, CategoryView, MetricsRouter, NewCategoryView, _ref1;
     this.app = (_ref1 = window.app) != null ? _ref1 : {};
     _.templateSettings = {
       interpolate: /\{\{\=(.+?)\}\}/g,
@@ -71,6 +71,68 @@
 
     })(Backbone.View);
     this.app.CategoryView = CategoryView;
+    NewCategoryView = (function(_super) {
+
+      __extends(NewCategoryView, _super);
+
+      NewCategoryView.name = 'NewCategoryView';
+
+      function NewCategoryView() {
+        return NewCategoryView.__super__.constructor.apply(this, arguments);
+      }
+
+      NewCategoryView.prototype.tagName = 'form';
+
+      NewCategoryView.prototype.template = _.template($('#new_category').html());
+
+      NewCategoryView.prototype.events = {
+        'keypress #category_name': 'saveNewCategoryIfSubmit',
+        'click #save-new-category': 'saveNewCategory',
+        'focusout #category_name': 'emptyMessages'
+      };
+
+      NewCategoryView.prototype.initialize = function() {
+        _.bindAll(this, 'render');
+        return this.collection.bind('reset', this.render);
+      };
+
+      NewCategoryView.prototype.render = function() {
+        $(this.el).html(this.template());
+        return this;
+      };
+
+      NewCategoryView.prototype.saveNewCategoryIfSubmit = function(event) {
+        if (event.keyCode === 13) {
+          event.preventDefault();
+          return saveNewCategory();
+        }
+      };
+
+      NewCategoryView.prototype.saveNewCategory = function() {
+        var attributes;
+        attributes = {
+          category: {
+            name: $("#category_name").val()
+          }
+        };
+        return this.collection.create(attributes, {
+          error: this.showErrors
+        });
+      };
+
+      NewCategoryView.prototype.emptyMessages = function() {
+        return $("#messages").empty();
+      };
+
+      NewCategoryView.prototype.showErrors = function(model, errors) {
+        this.emptyMessages();
+        return $("#messages").html(errors.responseText);
+      };
+
+      return NewCategoryView;
+
+    })(Backbone.View);
+    this.app.NewCategoryView = NewCategoryView;
     CategoriesView = (function(_super) {
 
       __extends(CategoriesView, _super);
@@ -126,14 +188,18 @@
 
       MetricsRouter.prototype.initialize = function() {
         window.categories = new app.Categories();
-        return this.categoriesView = new app.CategoriesView({
+        this.categoriesView = new app.CategoriesView({
+          collection: categories
+        });
+        return this.newCategoryView = new app.NewCategoryView({
           collection: categories
         });
       };
 
       MetricsRouter.prototype.dashboard = function() {
         window.categories.fetch();
-        return $("#container").html(this.categoriesView.el);
+        $("#container").html(this.categoriesView.el);
+        return $("#add_category").html(this.newCategoryView.el);
       };
 
       return MetricsRouter;
