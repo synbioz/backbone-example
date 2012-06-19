@@ -8,4 +8,14 @@ class CategoriesController < ApplicationController
 
   def show
   end
+
+  def create
+    @category = Category.new params[:category]
+    if @category.save
+      respond_with(@category)
+    else
+      render :status => 500, :json => @category.errors.full_messages.join(', ')
+    end
+  end
+
 end

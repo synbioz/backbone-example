@@ -12,9 +12,16 @@
       <h1>Liste des catégories</h1>
       <ul class="categories"></ul>
     </script>
+
+    <script type="text/template" id="new_category">
+      <input id="category_name" name="category[name]" type="text" placeholder="Type a category…" />
+      <input type="button" id="save-new-category" value="Enregistrer" />
+    </script>
   </head>
 
   <body>
+    <div id="messages"></div>
     <div id="container"></div>
+    <div id="add_category"></div>
   </body>
 </html>
