@@ -1,9 +1,14 @@
 (function() {
   var _ref,
     __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; },
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   this.app = (_ref = window.app) != null ? _ref : {};
+
+  String.prototype.isBlank = function() {
+    return /^\s*$/.test(this);
+  };
 
   $(document).ready(function() {
     var Categories, CategoriesView, Category, CategoryView, MetricsRouter, NewCategoryView, _ref1;
@@ -21,6 +26,14 @@
       function Category() {
         return Category.__super__.constructor.apply(this, arguments);
       }
+
+      Category.prototype.validate = function(attributes) {
+        var mergedAttributes;
+        mergedAttributes = _.extend(_.clone(this.attributes), attributes);
+        if (!mergedAttributes.name || mergedAttributes.name.isBlank()) {
+          return "Name can't be blank.";
+        }
+      };
 
       return Category;
 
@@ -78,6 +91,7 @@
       NewCategoryView.name = 'NewCategoryView';
 
       function NewCategoryView() {
+        this.showErrors = __bind(this.showErrors, this);
         return NewCategoryView.__super__.constructor.apply(this, arguments);
       }
 
@@ -125,8 +139,10 @@
       };
 
       NewCategoryView.prototype.showErrors = function(model, errors) {
+        var content;
+        content = errors.responseText || errors;
         this.emptyMessages();
-        return $("#messages").html(errors.responseText);
+        return $("#messages").html(content);
       };
 
       return NewCategoryView;

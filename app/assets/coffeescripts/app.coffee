@@ -1,4 +1,8 @@
 @app = window.app ? {}
+
+String.prototype.isBlank = ->
+  /^\s*$/.test(this)
+
 $(document).ready ->
   @app = window.app ? {}
 
@@ -9,6 +13,10 @@ $(document).ready ->
 
   # Model
   class Category extends Backbone.Model
+    validate: (attributes) ->
+      mergedAttributes = _.extend(_.clone(@attributes), attributes)
+      if !mergedAttributes.name or mergedAttributes.name.isBlank()
+        return "Name can't be blank."
 
   @app.Category = Category
 
@@ -59,9 +67,10 @@ $(document).ready ->
     emptyMessages: ->
       $("#messages").empty()
 
-    showErrors: (model, errors) ->
+    showErrors: (model, errors) =>
+      content = errors.responseText || errors
       @emptyMessages()
-      $("#messages").html(errors.responseText)
+      $("#messages").html(content)
 
   @app.NewCategoryView = NewCategoryView
 
