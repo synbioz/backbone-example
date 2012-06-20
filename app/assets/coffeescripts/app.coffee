@@ -15,7 +15,7 @@ $(document).ready ->
   class Category extends Backbone.Model
     validate: (attributes) ->
       mergedAttributes = _.extend(_.clone(@attributes), attributes)
-      if !mergedAttributes.name or mergedAttributes.name.isBlank()
+      if !mergedAttributes.category.name or mergedAttributes.category.name.isBlank()
         return "Name can't be blank."
 
   @app.Category = Category
@@ -35,7 +35,10 @@ $(document).ready ->
       _.bindAll(@, 'render')
 
     render: ->
-      $(@el).html @template(@model.toJSON())
+      json =  @model.toJSON()
+      json.name = json.category.name if json.category
+
+      $(@el).html @template(json)
       @
   @app.CategoryView = CategoryView
 
@@ -47,7 +50,7 @@ $(document).ready ->
       'click #save-new-category': 'saveNewCategory'
       'focusout #category_name': 'emptyMessages'
 
-    initialize: ->
+    initialize: (options) ->
       _.bindAll(@, 'render')
       @collection.bind 'reset', @render
 
@@ -55,14 +58,14 @@ $(document).ready ->
       $(@el).html @template()
       @
 
-    saveNewCategoryIfSubmit: (event) ->
-      if event.keyCode is 13
-        event.preventDefault()
-        saveNewCategory()
-
     saveNewCategory: ->
       attributes = { category: { name: $("#category_name").val() } }
       @collection.create(attributes, { error: @showErrors })
+
+    saveNewCategoryIfSubmit: (event) =>
+      if event.keyCode is 13
+        event.preventDefault()
+        @saveNewCategory()
 
     emptyMessages: ->
       $("#messages").empty()
@@ -81,6 +84,7 @@ $(document).ready ->
     initialize: ->
       _.bindAll(@, 'render')
       @collection.bind 'reset', @render
+      @collection.bind 'add', @render
 
     render: ->
       $(@el).html(@template())

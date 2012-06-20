@@ -30,7 +30,7 @@
       Category.prototype.validate = function(attributes) {
         var mergedAttributes;
         mergedAttributes = _.extend(_.clone(this.attributes), attributes);
-        if (!mergedAttributes.name || mergedAttributes.name.isBlank()) {
+        if (!mergedAttributes.category.name || mergedAttributes.category.name.isBlank()) {
           return "Name can't be blank.";
         }
       };
@@ -76,7 +76,12 @@
       };
 
       CategoryView.prototype.render = function() {
-        $(this.el).html(this.template(this.model.toJSON()));
+        var json;
+        json = this.model.toJSON();
+        if (json.category) {
+          json.name = json.category.name;
+        }
+        $(this.el).html(this.template(json));
         return this;
       };
 
@@ -92,6 +97,8 @@
 
       function NewCategoryView() {
         this.showErrors = __bind(this.showErrors, this);
+
+        this.saveNewCategoryIfSubmit = __bind(this.saveNewCategoryIfSubmit, this);
         return NewCategoryView.__super__.constructor.apply(this, arguments);
       }
 
@@ -105,7 +112,7 @@
         'focusout #category_name': 'emptyMessages'
       };
 
-      NewCategoryView.prototype.initialize = function() {
+      NewCategoryView.prototype.initialize = function(options) {
         _.bindAll(this, 'render');
         return this.collection.bind('reset', this.render);
       };
@@ -113,13 +120,6 @@
       NewCategoryView.prototype.render = function() {
         $(this.el).html(this.template());
         return this;
-      };
-
-      NewCategoryView.prototype.saveNewCategoryIfSubmit = function(event) {
-        if (event.keyCode === 13) {
-          event.preventDefault();
-          return saveNewCategory();
-        }
       };
 
       NewCategoryView.prototype.saveNewCategory = function() {
@@ -132,6 +132,13 @@
         return this.collection.create(attributes, {
           error: this.showErrors
         });
+      };
+
+      NewCategoryView.prototype.saveNewCategoryIfSubmit = function(event) {
+        if (event.keyCode === 13) {
+          event.preventDefault();
+          return this.saveNewCategory();
+        }
       };
 
       NewCategoryView.prototype.emptyMessages = function() {
@@ -165,7 +172,8 @@
 
       CategoriesView.prototype.initialize = function() {
         _.bindAll(this, 'render');
-        return this.collection.bind('reset', this.render);
+        this.collection.bind('reset', this.render);
+        return this.collection.bind('add', this.render);
       };
 
       CategoriesView.prototype.render = function() {
